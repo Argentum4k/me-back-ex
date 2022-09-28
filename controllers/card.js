@@ -9,7 +9,7 @@ function getCards(req, res) {
 function createCard(req, res) {
   const { name, link } = req.body;
   cardModel.create({ name, link, owner: req.user._id })
-    .then((newUser) => res.send({ data: newUser }))
+    .then((newCard) => res.send(newCard))
     .catch((err) => res.status(500).send({ message: `Произошла ошибка: ${err.message}` }));
 }
 
@@ -23,4 +23,26 @@ function deleteCard(req, res) {
   });
 }
 
-module.exports = { getCards, createCard, deleteCard };
+function putLike(req, res) {
+  cardModel.findByIdAndUpdate(
+    req.params.cardId,
+    { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
+    { new: true },
+  )
+    .then((newCard) => res.send(newCard))
+    .catch((err) => res.status(500).send({ message: `Произошла ошибка: ${err.message}` }));
+}
+
+function deleteLike(req, res) {
+  cardModel.findByIdAndUpdate(
+    req.params.cardId,
+    { $pull: { likes: req.user._id } }, // убрать _id из массива
+    { new: true },
+  )
+    .then((newCard) => res.send(newCard))
+    .catch((err) => res.status(500).send({ message: `Произошла ошибка: ${err.message}` }));
+}
+
+module.exports = {
+  getCards, createCard, deleteCard, putLike, deleteLike,
+};
