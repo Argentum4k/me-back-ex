@@ -1,24 +1,29 @@
 const cardModel = require('../models/card');
+const { INCORRECT_DATA, NOT_FOUND, DEFAULT_ERROR } = require('./errors');
 
 function getCards(req, res) {
-  cardModel.find({})
-    .then((cards) => res.send(cards))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка: ${err.message}` }));
+  cardModel.find({}, null, { sort: { createdAt: -1 } })
+    .then((cards) => res.send(cards)) // фильтрует овнеров-объекты (а не строки или id)
+    .catch((err) => res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.name} ${err.message}` }));
 }
 
 function createCard(req, res) {
   const { name, link } = req.body;
   cardModel.create({ name, link, owner: req.user._id })
     .then((newCard) => res.send(newCard))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка: ${err.message}` }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: переданы неверные данные' });
+      else res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.name} ${err.message}` });
+    });
 }
 
 function deleteCard(req, res) {
   cardModel.deleteOne({ _id: req.params.cardId }, (err) => {
     if (err) {
-      res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
+      if (err.name === 'CastError')res.status(NOT_FOUND).send({ message: 'Произошла ошибка: карточка не существует' });
+      else res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.name} ${err.message}` });
     } else {
-      res.status(400).send({ message: 'delete successful' });
+      res.status(400).send({ message: 'Пост удалён' });
     }
   });
 }
@@ -30,7 +35,10 @@ function putLike(req, res) {
     { new: true },
   )
     .then((newCard) => res.send(newCard))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка: ${err.message}` }));
+    .catch((err) => {
+      if (err.name === 'CastError')res.status(NOT_FOUND).send({ message: 'Произошла ошибка: карточка не существует' });
+      else res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.name} ${err.message}` });
+    });
 }
 
 function deleteLike(req, res) {
@@ -40,7 +48,10 @@ function deleteLike(req, res) {
     { new: true },
   )
     .then((newCard) => res.send(newCard))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка: ${err.message}` }));
+    .catch((err) => {
+      if (err.name === 'CastError')res.status(NOT_FOUND).send({ message: 'Произошла ошибка: карточка не существует' });
+      else res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.name} ${err.message}` });
+    });
 }
 
 module.exports = {
