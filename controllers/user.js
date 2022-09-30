@@ -8,9 +8,9 @@ function getUsers(req, res) {
 }
 
 function getUser(req, res) {
-  userModel.find({ _id: req.params.userId })
+  userModel.findOne({ _id: req.params.userId })
     .then((user) => {
-      if (user.length) res.send(user);
+      if (user) res.send(user);
       else res.status(NOT_FOUND).send({ message: 'Произошла ошибка: пользователь не найден' });
     })
     .catch((err) => {

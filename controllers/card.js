@@ -18,13 +18,12 @@ function createCard(req, res) {
 }
 
 function deleteCard(req, res) {
-  cardModel.deleteOne({ _id: req.params.cardId }, (err) => {
+  cardModel.deleteOne({ _id: req.params.cardId }, (err, result) => {
     if (err) {
-      if (err.name === 'CastError')res.status(NOT_FOUND).send({ message: 'Произошла ошибка: карточка не существует' });
+      if (err.name === 'CastError')res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: неверный ID карточки' });
       else res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.name} ${err.message}` });
-    } else {
-      res.status(400).send({ message: 'Пост удалён' });
-    }
+    } else if (result.deletedCount > 0) res.send({ message: 'Пост удалён' });
+    else res.status(NOT_FOUND).send({ message: 'Произошла ошибка: карточка не существует' });
   });
 }
 
@@ -34,9 +33,12 @@ function putLike(req, res) {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
-    .then((newCard) => res.send(newCard))
+    .then((newCard) => {
+      if (newCard) res.send(newCard);
+      else res.status(NOT_FOUND).send({ message: 'Произошла ошибка: карточка не существует' });
+    })
     .catch((err) => {
-      if (err.name === 'CastError')res.status(NOT_FOUND).send({ message: 'Произошла ошибка: карточка не существует' });
+      if (err.name === 'CastError')res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: неверный ID карточки' });
       else res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.name} ${err.message}` });
     });
 }
@@ -47,9 +49,12 @@ function deleteLike(req, res) {
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
-    .then((newCard) => res.send(newCard))
+    .then((newCard) => {
+      if (newCard) res.send(newCard);
+      else res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: карточка не существует' });
+    })
     .catch((err) => {
-      if (err.name === 'CastError')res.status(NOT_FOUND).send({ message: 'Произошла ошибка: карточка не существует' });
+      if (err.name === 'CastError')res.status(NOT_FOUND).send({ message: 'Произошла ошибка: неверный ID карточки' });
       else res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.name} ${err.message}` });
     });
 }
