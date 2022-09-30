@@ -11,7 +11,7 @@ function getUser(req, res) {
   userModel.findOne({ _id: req.params.userId })
     .then((user) => {
       if (user) res.send(user);
-      else res.status(NOT_FOUND).send({ message: 'Произошла ошибка: пользователь не найден' });
+      else res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: пользователь не существует' });
     })
     .catch((err) => {
       if (err.name === 'CastError')res.status(NOT_FOUND).send({ message: 'Произошла ошибка: пользователь не найден' });

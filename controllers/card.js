@@ -51,10 +51,10 @@ function deleteLike(req, res) {
   )
     .then((newCard) => {
       if (newCard) res.send(newCard);
-      else res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: карточка не существует' });
+      else res.status(NOT_FOUND).send({ message: 'Произошла ошибка: карточка не существует' });
     })
     .catch((err) => {
-      if (err.name === 'CastError')res.status(NOT_FOUND).send({ message: 'Произошла ошибка: неверный ID карточки' });
+      if (err.name === 'CastError')res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: неверный ID карточки' });
       else res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.name} ${err.message}` });
     });
 }
