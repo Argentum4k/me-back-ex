@@ -11,10 +11,10 @@ function getUser(req, res) {
   userModel.findOne({ _id: req.params.userId })
     .then((user) => {
       if (user) res.send(user);
-      else res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: пользователь не существует' });
+      else res.status(NOT_FOUND).send({ message: 'Произошла ошибка: пользователь не найден' });
     })
     .catch((err) => {
-      if (err.name === 'CastError')res.status(NOT_FOUND).send({ message: 'Произошла ошибка: пользователь не найден' });
+      if (err.name === 'CastError')res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: неверный ID пользователя' });
       else res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.name} ${err.message}` });
     });
 }
