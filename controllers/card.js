@@ -18,11 +18,14 @@ function createCard(req, res) {
 }
 
 function deleteCard(req, res) {
-  cardModel.findByIdAndDelete(req.params.cardId)
+  cardModel.find({ _id: req.params.cardId })
     .then((card) => {
-      if (card) res.send({ message: 'Пост удалён' });
-      else res.status(NOT_FOUND).send({ message: 'Произошла ошибка: карточка не существует' });
+      if (card) {
+        if (card.owner === req.user._id) cardModel.findByIdAndDelete(req.params.cardId);
+        else res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: чужая карточка' });
+      } else res.status(NOT_FOUND).send({ message: 'Произошла ошибка: карточка не существует' });
     })
+    .then(() => res.send({ message: 'Пост удалён' }))
     .catch((err) => {
       if (err.name === 'CastError')res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: неверный ID карточки' });
       else res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.message}` });
