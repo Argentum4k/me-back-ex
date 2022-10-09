@@ -25,6 +25,11 @@ app.use('/cards', require('./routes/cards'));
 
 app.use('/', error404);
 
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  res.status(500).send({ message: 'На сервере произошла ошибка' });
+});
+
 app.listen(
   PORT,
   () => {
