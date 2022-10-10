@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-// const { error404 } = require('./errors/errors');
+const { errors } = require('celebrate');
 const { login, createUser } = require('./controllers/user');
 const auth = require('./middlewares/auth');
 const ErrorHandler = require('./errors/ErrorHandler');
@@ -21,11 +21,11 @@ app.post('/signin', login);
 app.post('/signup', createUser);
 // авторизация
 app.use(auth);
+// роуты
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
-
-// app.use('/', error404);
-
+// ошибки
+app.use(errors()); // обработчик ошибок celebrate
 app.use(ErrorHandler);
 
 app.listen(

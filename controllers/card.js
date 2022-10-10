@@ -1,6 +1,6 @@
 const cardModel = require('../models/card');
 const {
-  DefaultError, IncorrectDataError, NotFoundError,
+  DefaultError, IncorrectDataError, NotFoundError, ForbiddenError,
 } = require('../errors/errors');
 
 function getCards(req, res, next) {
@@ -27,7 +27,7 @@ function deleteCard(req, res, next) {
     .then((card) => {
       if (card) {
         if (card.owner === req.user._id) cardModel.findByIdAndDelete(req.params.cardId);
-        else next(new IncorrectDataError('чужая карточка'));
+        else next(new ForbiddenError('чужая карточка'));
         // res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: чужая карточка' });
       } else next(new NotFoundError('карточка'));
       // res.status(NOT_FOUND).send({ message: 'Произошла ошибка: карточка не существует' });

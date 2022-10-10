@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const userModel = require('../models/user');
 const {
-  UnauthorizedError, IncorrectDataError, DefaultError, NotFoundError,
+  UnauthorizedError, IncorrectDataError, DefaultError, NotFoundError, ConflictError,
 } = require('../errors/errors');
 
 function getUsers(req, res, next) {
@@ -55,6 +55,7 @@ function createUser(req, res, next) {
     .catch((err) => {
       if (err.name === 'ValidationError') next(new IncorrectDataError('почта/пароль'));
       // res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: переданы неверные данные' });
+      else if (err.code === 11000) next(new ConflictError('пользователь с такой почтой ужесуществует'));
       else next(new DefaultError(`ошибка создания пользователя: ${err.message}`));
       // res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.message}` });
     });
@@ -62,8 +63,6 @@ function createUser(req, res, next) {
 
 function updateProfile(req, res, next) {
   const { name = null, about = null } = req.body; // для валидации обнуляем
-  // eslint-disable-next-line max-len
-  // все и так валидировалось в отправленном ранее варианте, см. app.js строка 11 а так же коментарий в предыдущей строке (!)
   userModel.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((newUser) => res.send(newUser))
     .catch((err) => {
