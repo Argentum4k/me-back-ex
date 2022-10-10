@@ -115,7 +115,7 @@ function login(req, res, next) {
       })
         .send({
           message: 'успешная авторизация',
-          jwt: token, // для GHA ибо из кук почемуто не берет
+          // jwt: token, // для GHA ибо из кук почемуто не берет
         });
     })
     .catch((err) => {
