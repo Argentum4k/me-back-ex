@@ -113,7 +113,10 @@ function login(req, res, next) {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
       })
-        .send({ message: 'успешная авторизация' });
+        .send({
+          message: 'успешная авторизация',
+          jwt: token, // для GHA ибо из кук почемуто не берет
+        });
     })
     .catch((err) => {
       // ошибка аутентификации
