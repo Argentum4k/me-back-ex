@@ -25,12 +25,9 @@ module.exports = (req, res, next) => {
     payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret');
   } catch (err) {
     next(new UnauthorizedError('неверный токен'));
-    // return res
-    //   .status(401)
-    //   .send({ message: 'Необходима авторизация' });
   }
 
   req.user = payload; // записываем пейлоуд в объект запроса
-
+  // req.user._id = mongoose.Types.ObjectId(req.user._id);
   next(); // пропускаем запрос дальше
 };
