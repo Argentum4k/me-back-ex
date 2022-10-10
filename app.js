@@ -6,6 +6,7 @@ const { errors } = require('celebrate');
 const { login, createUser } = require('./controllers/user');
 const auth = require('./middlewares/auth');
 const ErrorHandler = require('./errors/ErrorHandler');
+const { validateNewUser, validateCredentials } = require('./middlewares/celebrations');
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -17,8 +18,8 @@ app.use(bodyParser.json()); // для собирания JSON-формата
 app.use(cookieParser()); // парсер кук
 app.use(bodyParser.urlencoded({ extended: true })); // для приёма веб-страниц внутри POST-запроса
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signin', validateCredentials, login);
+app.post('/signup', validateNewUser, createUser);
 // авторизация
 app.use(auth);
 // роуты

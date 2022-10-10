@@ -7,11 +7,11 @@ const { UnauthorizedError } = require('../errors/errors');
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    next(new UnauthorizedError('нет авторизации'));
-    // return res
-    //   .status(401)
-    //   .send({ message: 'Необходима авторизация' });
+    // console.log('in if');
+    // return потому что без него выходит дальше... непонятно почему
+    return next(new UnauthorizedError('нет авторизации'));
   }
+  // console.log('out of if');
   const token = authorization.replace('Bearer ', '');
   let payload;
   const { NODE_ENV, JWT_SECRET } = process.env;

@@ -43,24 +43,6 @@ function getMe(req, res, next) {
     });
 }
 
-function createUser(req, res, next) {
-  const {
-    name, about, avatar, email, password,
-  } = req.body;
-  bcrypt.hash(password, 10)
-    .then((hash) => userModel.create({
-      name, about, avatar, email, password: hash,
-    }))
-    .then((newUser) => res.send(newUser))
-    .catch((err) => {
-      if (err.name === 'ValidationError') next(new IncorrectDataError('почта/пароль'));
-      // res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: переданы неверные данные' });
-      else if (err.code === 11000) next(new ConflictError('пользователь с такой почтой ужесуществует'));
-      else next(new DefaultError(`ошибка создания пользователя: ${err.message}`));
-      // res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.message}` });
-    });
-}
-
 function updateProfile(req, res, next) {
   const { name = null, about = null } = req.body; // для валидации обнуляем
   userModel.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
@@ -87,6 +69,33 @@ function updateAvatar(req, res, next) {
     });
 }
 
+function createUser(req, res, next) {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  bcrypt.hash(password, 10)
+    .then((hash) => userModel.create({
+      name, about, avatar, email, password: hash,
+    }))
+    .then((newUser) => {
+      // выглядит ужасно но не нашел лучшего решения как не выводить хэш пароля
+      const toSend = (({
+        // eslint-disable-next-line no-shadow
+        name, about, avatar, email, _id,
+      }) => ({
+        name, about, avatar, email, _id,
+      }))(newUser);
+      res.send(toSend);
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') next(new IncorrectDataError('почта/пароль'));
+      // res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: переданы неверные данные' });
+      else if (err.code === 11000) next(new ConflictError('пользователь с такой почтой уже существует'));
+      else next(new DefaultError(`ошибка создания пользователя: ${err.message}`));
+      // res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.message}` });
+    });
+}
+
 function login(req, res, next) {
   const { email, password } = req.body;
   return userModel.findUserByCredentials(email, password)
@@ -104,7 +113,7 @@ function login(req, res, next) {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
       })
-        .end();
+        .send({ message: 'успешная авторизация' });
     })
     .catch((err) => {
       // ошибка аутентификации
