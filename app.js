@@ -2,9 +2,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const { error404 } = require('./controllers/errors');
+// const { error404 } = require('./errors/errors');
 const { login, createUser } = require('./controllers/user');
 const auth = require('./middlewares/auth');
+const ErrorHandler = require('./errors/ErrorHandler');
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -23,12 +24,9 @@ app.use(auth);
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
-app.use('/', error404);
+// app.use('/', error404);
 
-// eslint-disable-next-line no-unused-vars
-app.use((err, req, res, next) => {
-  res.status(500).send({ message: 'На сервере произошла ошибка' });
-});
+app.use(ErrorHandler);
 
 app.listen(
   PORT,

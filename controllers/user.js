@@ -2,39 +2,48 @@ require('dotenv').config();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const userModel = require('../models/user');
-const { INCORRECT_DATA, NOT_FOUND, DEFAULT_ERROR } = require('./errors');
+const {
+  UnauthorizedError, IncorrectDataError, DefaultError, NotFoundError,
+} = require('../errors/errors');
 
-function getUsers(req, res) {
+function getUsers(req, res, next) {
   userModel.find({})
     .then((users) => res.send(users))
-    .catch((err) => res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.message}` }));
+    .catch((err) => next(new DefaultError(`ошибка получения пользователя: ${err.message}`)));
+  // res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.message}` }));
 }
 
-function getUser(req, res) {
+function getUser(req, res, next) {
   userModel.findOne({ _id: req.params.userId })
     .then((user) => {
       if (user) res.send(user);
-      else res.status(NOT_FOUND).send({ message: 'Произошла ошибка: пользователь не найден' });
+      else next(new NotFoundError('пользователь'));
+      // res.status(NOT_FOUND).send({ message: 'Произошла ошибка: пользователь не найден' });
     })
     .catch((err) => {
-      if (err.name === 'CastError')res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: неверный ID пользователя' });
-      else res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.message}` });
+      if (err.name === 'CastError') next(new IncorrectDataError('ID пользователя'));
+      // res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: неверный ID пользователя' });
+      else next(new DefaultError(`ошибка получения пользователя: ${err.message}`));
+      // res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.message}` });
     });
 }
 
-function getMe(req, res) {
+function getMe(req, res, next) {
   userModel.findOne({ _id: req.user._id })
     .then((user) => {
       if (user) res.send(user);
-      else res.status(NOT_FOUND).send({ message: 'Произошла ошибка: пользователь не найден' });
+      else next(new NotFoundError('пользователь'));
+      // res.status(NOT_FOUND).send({ message: 'Произошла ошибка: пользователь не найден' });
     })
     .catch((err) => {
-      if (err.name === 'CastError')res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: неверный ID пользователя' });
-      else res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.message}` });
+      if (err.name === 'CastError') next(new IncorrectDataError('ID пользователя'));
+      // res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: неверный ID пользователя' });
+      else next(new DefaultError(`ошибка получения пользователя: ${err.message}`));
+      // res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.message}` });
     });
 }
 
-function createUser(req, res) {
+function createUser(req, res, next) {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -44,36 +53,42 @@ function createUser(req, res) {
     }))
     .then((newUser) => res.send(newUser))
     .catch((err) => {
-      if (err.name === 'ValidationError') res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: переданы неверные данные' });
-      else res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.message}` });
+      if (err.name === 'ValidationError') next(new IncorrectDataError('почта/пароль'));
+      // res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: переданы неверные данные' });
+      else next(new DefaultError(`ошибка создания пользователя: ${err.message}`));
+      // res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.message}` });
     });
 }
 
-function updateProfile(req, res) {
+function updateProfile(req, res, next) {
   const { name = null, about = null } = req.body; // для валидации обнуляем
   // eslint-disable-next-line max-len
   // все и так валидировалось в отправленном ранее варианте, см. app.js строка 11 а так же коментарий в предыдущей строке (!)
   userModel.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((newUser) => res.send(newUser))
     .catch((err) => {
-      if (err.name === 'ValidationError') res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: переданы неверные данные' });
-      else res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.message}` });
+      if (err.name === 'ValidationError') next(new IncorrectDataError('профиль'));
+      // res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: переданы неверные данные' });
+      else next(new DefaultError(`обновление профиля: ${err.message}`));
+      // res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.message}` });
     });
 }
 
-function updateAvatar(req, res) {
+function updateAvatar(req, res, next) {
   const { avatar = null } = req.body; // для валидации обнуляем
   // eslint-disable-next-line max-len
   // все и так валидировалось в отправленном ранее варианте, см. app.js строка 11 а так же коментарий в предыдущей строке (!)
   userModel.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((newUser) => res.send(newUser))
     .catch((err) => {
-      if (err.name === 'ValidationError') res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: переданы неверные данные' });
-      else res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.message}` });
+      if (err.name === 'ValidationError') next(new IncorrectDataError('аватар'));
+      // res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: переданы неверные данные' });
+      else next(new DefaultError(`обновление аватара: ${err.message}`));
+      // res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.message}` });
     });
 }
 
-function login(req, res) {
+function login(req, res, next) {
   const { email, password } = req.body;
   return userModel.findUserByCredentials(email, password)
     .then((user) => {
@@ -94,10 +109,13 @@ function login(req, res) {
     })
     .catch((err) => {
       // ошибка аутентификации
-      res
-        .status(401)
-        .send({ message: err.message });
+      next(new UnauthorizedError(err.message));
+      // throw new UnauthorizedError(err.message);
+      // res
+      //   .status(UNAUTHORIZED)
+      //   .send({ message: err.message });
     });
+  // .catch(next);
 }
 
 module.exports = {
