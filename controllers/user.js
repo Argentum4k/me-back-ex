@@ -78,7 +78,7 @@ function createUser(req, res, next) {
       name, about, avatar, email, password: hash,
     }))
     .then((newUser) => {
-      const toSend = { ...newUser };
+      const toSend = { ...newUser.toJSON() };
       delete toSend.password; // todo check
       res.send(toSend);
     })
