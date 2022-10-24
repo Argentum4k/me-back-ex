@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const { errors } = require('celebrate');
+const fs = require('fs');
 const { login, createUser } = require('./controllers/user');
 const auth = require('./middlewares/auth');
 const ErrorHandler = require('./errors/ErrorHandler');
@@ -16,11 +17,17 @@ const { PORT = 3000 } = process.env;
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
+// для разработки
+fs.unlink('./error.log');
+fs.unlink('./request.log');
+
+app.use(cors({
+  credentials: true,
+}));
 app.use(bodyParser.json()); // для собирания JSON-формата
 app.use(cookieParser()); // парсер кук
-app.use(bodyParser.urlencoded({ extended: true })); // для приёма веб-страниц внутри POST-запроса
+// app.use(bodyParser.urlencoded({ extended: true })); // для приёма веб-страниц внутри POST-запроса
 
-app.use(cors());
 app.use(requestLogger); // подключаем логгер запросов
 
 app.get('/crash-test', () => {

@@ -105,6 +105,8 @@ function login(req, res, next) {
         // token - наш JWT токен, который мы отправляем
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
+        // secure: true,    //не то похоже
+        // sameSite: 'none',
       })
         .send({
           message: 'успешная авторизация',
