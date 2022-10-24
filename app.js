@@ -22,6 +22,7 @@ fs.unlink('./error.log');
 fs.unlink('./request.log');
 
 app.use(cors({
+  origin: 'http://localhost:3000',
   credentials: true,
 }));
 app.use(bodyParser.json()); // для собирания JSON-формата
