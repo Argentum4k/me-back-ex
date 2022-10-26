@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const { errors } = require('celebrate');
 const fs = require('fs');
-const { login, createUser } = require('./controllers/user');
+const { login, createUser, logout } = require('./controllers/user');
 const auth = require('./middlewares/auth');
 const ErrorHandler = require('./errors/ErrorHandler');
 const { validateNewUser, validateCredentials } = require('./middlewares/celebrations');
@@ -18,16 +18,17 @@ const { PORT = 3000 } = process.env;
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
 // для разработки
-fs.unlink('./error.log');
-fs.unlink('./request.log');
+/* eslint-disable no-console */
+fs.unlink('./error.log', console.log);
+fs.unlink('./request.log', console.log);
+/* eslint-enable no-console */
 
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: ['http://localhost:3000', 'http://localho.st:3000', 'http://fdmitrij.nomoredomains.icu', 'https://fdmitrij.nomoredomains.icu'],
   credentials: true,
 }));
 app.use(bodyParser.json()); // для собирания JSON-формата
 app.use(cookieParser()); // парсер кук
-// app.use(bodyParser.urlencoded({ extended: true })); // для приёма веб-страниц внутри POST-запроса
 
 app.use(requestLogger); // подключаем логгер запросов
 
@@ -41,6 +42,7 @@ app.post('/signup', validateNewUser, createUser);
 // авторизация
 app.use(auth);
 // роуты
+app.post('/logout', logout);
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 // ошибки

@@ -18,8 +18,6 @@ const validateProfile = celebrate({
 const validateAvatar = celebrate({
   body: Joi.object().keys({
     avatar: Joi.string().required().uri({ domain: { minDomainSegments: 2 } }),
-    // eslint-disable-next-line max-len
-    // avatar: Joi.string().required().regex(/^https?:\/\/(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+[a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=]*$/),
   }),
 });
 

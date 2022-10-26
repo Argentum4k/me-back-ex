@@ -1,5 +1,4 @@
 const isEmail = require('validator/lib/isEmail');
-// const isUrl = require('validator/lib/isURL');
 
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
@@ -7,14 +6,12 @@ const bcrypt = require('bcrypt');
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    // required: true,
     default: 'Жак-Ив Кусто',
     minLength: 2,
     maxLength: 30,
   }, // имя пользователя, строка от 2 до 30 символов, обязательное поле;
   about: {
     type: String,
-    // required: true,
     default: 'Исследователь',
     minLength: 2,
     maxLength: 30,
@@ -27,7 +24,6 @@ const userSchema = new mongoose.Schema({
       validator: (value) => /^https?:\/\/(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+[a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=]*$/.test(value),
       message: 'invalid avatar url!',
     },
-    // required: true,
   }, // ссылка на аватарку, строка, обязательное поле.
   email: {
     type: String,

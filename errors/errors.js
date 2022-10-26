@@ -62,11 +62,6 @@ class DefaultError extends MestoError {
   }
 }
 
-// function error404(req, res) {
-//   res.status(NOT_FOUND).send({ message: 'Ресурс не найден. Проверьте URL и метод запроса' });
-//   res.render();
-// }
-
 module.exports = {
   INCORRECT_DATA,
   NOT_FOUND,

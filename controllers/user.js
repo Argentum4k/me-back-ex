@@ -10,7 +10,6 @@ function getUsers(req, res, next) {
   userModel.find({})
     .then((users) => res.send(users))
     .catch((err) => next(new DefaultError(`ошибка получения пользователя: ${err.message}`)));
-  // res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.message}` }));
 }
 
 function getUser(req, res, next) {
@@ -18,13 +17,10 @@ function getUser(req, res, next) {
     .then((user) => {
       if (user) res.send(user);
       else next(new NotFoundError('пользователь'));
-      // res.status(NOT_FOUND).send({ message: 'Произошла ошибка: пользователь не найден' });
     })
     .catch((err) => {
       if (err.name === 'CastError') next(new IncorrectDataError('ID пользователя'));
-      // res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: неверный ID пользователя' });
       else next(new DefaultError(`ошибка получения пользователя: ${err.message}`));
-      // res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.message}` });
     });
 }
 
@@ -33,13 +29,10 @@ function getMe(req, res, next) {
     .then((user) => {
       if (user) res.send(user);
       else next(new NotFoundError('пользователь'));
-      // res.status(NOT_FOUND).send({ message: 'Произошла ошибка: пользователь не найден' });
     })
     .catch((err) => {
       if (err.name === 'CastError') next(new IncorrectDataError('ID пользователя'));
-      // res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: неверный ID пользователя' });
       else next(new DefaultError(`ошибка получения пользователя: ${err.message}`));
-      // res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.message}` });
     });
 }
 
@@ -49,23 +42,18 @@ function updateProfile(req, res, next) {
     .then((newUser) => res.send(newUser))
     .catch((err) => {
       if (err.name === 'ValidationError') next(new IncorrectDataError('профиль'));
-      // res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: переданы неверные данные' });
       else next(new DefaultError(`обновление профиля: ${err.message}`));
-      // res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.message}` });
     });
 }
 
 function updateAvatar(req, res, next) {
   const { avatar = null } = req.body; // для валидации обнуляем
   // eslint-disable-next-line max-len
-  // все и так валидировалось в отправленном ранее варианте, см. app.js строка 11 а так же коментарий в предыдущей строке (!)
   userModel.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((newUser) => res.send(newUser))
     .catch((err) => {
       if (err.name === 'ValidationError') next(new IncorrectDataError('аватар'));
-      // res.status(INCORRECT_DATA).send({ message: 'Произошла ошибка: переданы неверные данные' });
       else next(new DefaultError(`обновление аватара: ${err.message}`));
-      // res.status(DEFAULT_ERROR).send({ message: `Произошла ошибка: ${err.message}` });
     });
 }
 
@@ -105,8 +93,8 @@ function login(req, res, next) {
         // token - наш JWT токен, который мы отправляем
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
-        // secure: true,    //не то похоже
-        // sameSite: 'none',
+        secure: true, // не то похоже или только для https
+        sameSite: 'none',
       })
         .send({
           message: 'успешная авторизация',
@@ -118,6 +106,19 @@ function login(req, res, next) {
     });
 }
 
+function logout(req, res) {
+  // Set token to none and expire after 5 seconds
+  res.cookie('jwt', 'none', {
+    maxAge: 5,
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+  })
+    .send({
+      message: 'вы разлогинены успешно',
+    });
+}
+
 module.exports = {
-  getUsers, getUser, createUser, updateProfile, updateAvatar, login, getMe,
+  getUsers, getUser, createUser, updateProfile, updateAvatar, login, getMe, logout,
 };
