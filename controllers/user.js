@@ -104,7 +104,7 @@ function login(req, res, next) {
     })
     .catch(() => {
       // ошибка аутентификации
-      next(new UnauthorizedError('ошибка авторизации'));
+      next(new UnauthorizedError('неверная почта или пароль'));
     });
 }
 
