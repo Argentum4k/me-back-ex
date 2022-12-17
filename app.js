@@ -24,7 +24,7 @@ fs.unlink('./request.log', console.log);
 /* eslint-enable no-console */
 
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localho.st:3000', 'http://fdmitrij.nomoredomains.icu', 'https://fdmitrij.nomoredomains.icu'],
+  origin: ['https://multipasport.nomoredomains.icu', 'http://localhost:3000', 'http://localho.st:3000', 'http://fdmitrij.nomoredomains.icu', 'https://fdmitrij.nomoredomains.icu'],
   credentials: true,
 }));
 app.use(bodyParser.json()); // для собирания JSON-формата
